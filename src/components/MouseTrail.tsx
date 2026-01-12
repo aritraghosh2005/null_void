@@ -92,10 +92,9 @@ export default function MouseTrail() {
           ref={(el) => { dotsRef.current[i] = el; }}
           className="absolute top-0 left-0 bg-white rounded-full translate-x-[-50%] translate-y-[-50%]"
           style={{
-            width: '130px', // Slightly smaller base size for higher density
+            width: '130px', 
             height: '130px',
             willChange: 'transform',
-            // Fade out the tail opacity slightly for depth
             opacity: 1 - (i / TRAIL_LENGTH) * 0.8, 
           }}
         />
