@@ -21,16 +21,29 @@ export default function Board() {
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle, #222 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-          transform: `translate(${mouse.x / 60}px, ${mouse.y / 60}px)`, // The Parallax effect
-        }}
+  // cx/cy = center position (20 is middle of 40)
+  // r = radius (2px radius = 4px wide dot). Change 'r' to resize.
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23555'/%3E%3C/svg%3E")`,
+          transform: `translate(${mouse.x / 60}px, ${mouse.y / 60}px)`,
+      }}
       />
 
-      {/* Title */}
-      <div className="absolute top-8 left-10 pointer-events-none">
-        <h1 className="text-2xl font-light tracking-widest opacity-50">null_void</h1>
-        <p className="text-xs text-slate-500">Double-click to create</p>
+      {/* Title & UI Layer - Z-Index 100 ensures it stays on top */}
+      <div className="absolute top-12 left-12 pointer-events-none z-[100] select-none">
+        
+        {/* Main Logo: Gradient Text + Glow */}
+        <h1 className="font-mono text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/10 drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
+          Null Void
+        </h1>
+
+        {/* Status Line: Blinking Dot + Monospace Tech Text */}
+        <div className="flex items-center gap-3 mt-2 pl-1 opacity-70">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_#34d399]" />
+          <p className="font-mono text-xs text-emerald-400/80 tracking-widest uppercase">
+            System Online // Double-click to Initialize
+          </p>
+        </div>
+        
       </div>
 
       {/* Render All Pins */}
