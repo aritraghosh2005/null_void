@@ -1,5 +1,3 @@
-// types/board.ts
-
 export type PinType = 'text' | 'image';
 
 export interface Pin {
@@ -7,15 +5,20 @@ export interface Pin {
   type: PinType;
   x: number;
   y: number;
-  content: string; // Used for text OR image data URL
-  width?: number;  // Optional, since text pins might use defaults
-  height?: number; // Optional
+  content: string;
+  title?: string; // [NEW]
+  width?: number;
+  height?: number;
   color: string;
 }
 
 export interface BoardStore {
   pins: Pin[];
-  
+  view: { x: number; y: number; scale: number };
+
+  boardTitle: string;
+  updateBoardTitle: (title: string) => void;
+  // [FIX] Ensure addPin matches the arguments we use
   addPin: (
     type: PinType, 
     x: number, 
@@ -25,17 +28,16 @@ export interface BoardStore {
     height?: number
   ) => void;
 
-  saveHistory: () => void; 
+  updatePinPosition: (id: string, x: number, y: number) => void;
+  updatePinContent: (id: string, content: string) => void;
+  updatePinTitle: (id: string, title: string) => void; // [NEW]
+  removePin: (id: string) => void;
+
+  saveHistory: () => void;
   undo: () => void;
   redo: () => void;
   history: Pin[][]; 
   future: Pin[][];
-
-  updatePinPosition: (id: string, x: number, y: number) => void;
-  updatePinContent: (id: string, content: string) => void;
-  removePin: (id: string) => void;
-
-  // Viewport state for the infinite canvas
-  view: { x: number, y: number, scale: number };
+  
   updateView: (view: Partial<{ x: number, y: number, scale: number }>) => void;
 }

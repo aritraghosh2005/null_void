@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
-import { BoardStore, Pin } from '../types/board'; // Ensure Pin is imported
+import { BoardStore } from '../types/board';
 import { persist } from 'zustand/middleware';
 
 const COLORS = [
@@ -12,51 +12,44 @@ export const useStore = create<BoardStore>()(
     (set, get) => ({
       pins: [],
       view: { x: 0, y: 0, scale: 1 },
+
+      boardTitle: 'Null Void',
       
-      // [NEW] Time Travel Arrays
+      updateBoardTitle: (title) => set({ boardTitle: title }),
+      
       history: [],
       future: [],
 
-      // 1. SAVE SNAPSHOT
       saveHistory: () => {
         const { pins, history } = get();
-        // Limit history to last 50 steps to save memory
         const newHistory = [...history, pins].slice(-50); 
         set({ history: newHistory, future: [] });
       },
 
-      // 2. UNDO
       undo: () => {
         const { history, future, pins } = get();
         if (history.length === 0) return;
-
         const previous = history[history.length - 1];
-        const newHistory = history.slice(0, -1);
-
         set({
           pins: previous,
-          history: newHistory,
-          future: [pins, ...future], // Save current state to future
+          history: history.slice(0, -1),
+          future: [pins, ...future],
         });
       },
 
-      // 3. REDO
       redo: () => {
         const { history, future, pins } = get();
         if (future.length === 0) return;
-
         const next = future[0];
-        const newFuture = future.slice(1);
-
         set({
           pins: next,
           history: [...history, pins],
-          future: newFuture,
+          future: future.slice(1),
         });
       },
 
       addPin: (type, x, y, content = '', width, height) => {
-        get().saveHistory(); // [IMPORTANT] Save before adding
+        get().saveHistory();
         const defaultW = 250;
         const defaultH = 180;
         set((state) => ({
@@ -66,6 +59,7 @@ export const useStore = create<BoardStore>()(
             x,
             y,
             content,
+            title: type.toUpperCase(), // [NEW] Default Title
             width: width || defaultW, 
             height: height || defaultH, 
             color: COLORS[Math.floor(Math.random() * COLORS.length)], 
@@ -73,8 +67,15 @@ export const useStore = create<BoardStore>()(
         }));
       },
 
+      updatePinTitle: (id, title) => {
+        get().saveHistory();
+        set((state) => ({
+          pins: state.pins.map(pin => pin.id === id ? { ...pin, title } : pin)
+        }));
+      },
+
       removePin: (id) => {
-        get().saveHistory(); // [IMPORTANT] Save before removing
+        get().saveHistory();
         set((state) => ({
           pins: state.pins.filter(pin => pin.id !== id)
         }));
