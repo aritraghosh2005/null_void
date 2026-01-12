@@ -1,4 +1,5 @@
 "use client";
+import MouseTrail from '../components/MouseTrail';
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import PinCard from '../components/PinCard';
@@ -50,6 +51,9 @@ export default function Board() {
       {pins.map((pin) => (
         <PinCard key={pin.id} pin={pin} />
       ))}
+
+      {/* The Liquid Cursor Layer - Must be last to sit on top */}
+      <MouseTrail />
     </main>
   );
 }
