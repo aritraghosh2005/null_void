@@ -2,7 +2,7 @@
 
 **Null Void** is a minimalist, infinite creative canvas built for visual thinkers. It allows users to place text notes and images onto a limitless, zoomable grid. Featuring high-performance kinetic typography, smooth mouse trails, and a spatial interface, it serves as a modern mood board or brainstorming tool.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Site-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://null-void-one.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Site-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://null-void-cu6c.vercel.app/)
 
 ## ✨ Features
 
