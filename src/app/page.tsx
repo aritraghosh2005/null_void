@@ -80,10 +80,9 @@ export default function Board() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      isPanning.current = true;
-      lastMouse.current = { x: e.clientX, y: e.clientY };
-    }
+    isPanning.current = true;
+    lastMouse.current = { x: e.clientX, y: e.clientY };
+
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -144,7 +143,7 @@ export default function Board() {
         <div className="flex items-center gap-3 mt-2 pl-1 opacity-70">
           <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_#34d399]" />
           <p className="font-mono text-xs text-emerald-400/80 tracking-widest uppercase">
-             POS: {Math.round(view.x)},{Math.round(view.y)}
+             POS: {Math.round(view.x)},{Math.round(view.y)} • ZOOM: {view.scale.toFixed(1)}x
           </p>
         </div>
       </div>

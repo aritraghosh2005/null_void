@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react';
 import { Pin } from '../types/board';
 import { useStore } from '../store/useStore';
 
-// [HELPER] Luminance check
 const isBrightColor = (hex: string) => {
   const c = hex.substring(1); 
   const rgb = parseInt(c, 16); 
@@ -14,7 +13,6 @@ const isBrightColor = (hex: string) => {
   return luma > 140; 
 };
 
-// [HELPER] Kinetic Animation
 const AnimatedTitle = ({ text, isDarkText }: { text: string, isDarkText: boolean }) => {
   return (
     <div 
@@ -54,16 +52,9 @@ export default function PinCard({ pin }: { pin: Pin }) {
   const mutedTextClass = isDarkText ? 'text-black/50 hover:text-black' : 'text-white/50 hover:text-white';
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Prevent interaction with inputs/buttons from starting a drag
-    if ((e.target as HTMLElement).tagName === 'INPUT') return;
-    if ((e.target as HTMLElement).tagName === 'BUTTON') return;
-
-    e.stopPropagation(); // Stop event from bubbling to background
+    e.stopPropagation(); 
+    e.preventDefault(); 
     
-    const header = e.currentTarget as HTMLElement;
-    const card = header.parentElement; 
-    if (!card) return;
-
     saveHistory(); 
 
     const mouseX = (e.clientX - view.x) / view.scale;
@@ -71,7 +62,7 @@ export default function PinCard({ pin }: { pin: Pin }) {
 
     offset.current = { x: mouseX - pin.x, y: mouseY - pin.y };
     setIsDragging(true);
-    header.setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -86,7 +77,6 @@ export default function PinCard({ pin }: { pin: Pin }) {
     e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
-  // [FIXED] Single click handler for Edit
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
     setIsEditingTitle(true);
@@ -109,26 +99,33 @@ export default function PinCard({ pin }: { pin: Pin }) {
         borderColor: pin.color,
         boxShadow: `0 0 10px ${pin.color}40`,
       }}
-      // Prevent background double-click (New Card) when clicking the card itself
-      onDoubleClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()} 
+      onMouseDown={(e) => e.stopPropagation()}
       className="absolute top-0 left-0 flex flex-col bg-black/90 backdrop-blur-md border-2 rounded-xl overflow-hidden transition-shadow duration-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
     >
-      {/* HEADER */}
+      {/* HEADER (Draggable Area) */}
       <div 
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        // Parent has cursor-grab for the empty areas
-        className="header-trigger h-8 w-full cursor-grab active:cursor-grabbing flex items-center justify-between px-3 z-10 border-b border-white/10 group"
+        // [FIX] Added 'header-trigger' back so the CSS animation works
+        className="header-trigger relative h-8 w-full cursor-grab active:cursor-grabbing flex items-center justify-between px-3 z-10 border-b border-white/10 group"
         style={{ backgroundColor: pin.color }}
       >
-        <div 
-          // [FIX] cursor-text forces the 'I-beam' cursor
-          // [FIX] onPointerDown stopPropagation prevents dragging when clicking the text
-          className="flex-1 mr-2 h-full flex items-center cursor-text" 
-          onClick={handleTitleClick}
-          onPointerDown={(e) => e.stopPropagation()} 
-        >
+        
+        {/* INVISIBLE EDIT ZONE (Left 25%) */}
+        {!isEditingTitle && (
+          <div 
+            onClick={handleTitleClick}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="absolute top-0 left-0 h-full w-[25%] z-20 cursor-text hover:bg-white/10"
+            title="Click here to edit"
+          />
+        )}
+
+        {/* TEXT DISPLAY (Full Width underneath) */}
+        <div className="flex-1 mr-8 h-full flex items-center select-none overflow-hidden">
           {isEditingTitle ? (
             <input 
               autoFocus
@@ -137,10 +134,11 @@ export default function PinCard({ pin }: { pin: Pin }) {
               onKeyDown={(e) => e.key === 'Enter' && handleTitleSubmit(e)}
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
-              className={`w-full bg-transparent font-bold font-mono text-xs uppercase focus:outline-none ${textColorClass} placeholder:${isDarkText ? 'text-black/50' : 'text-white/50'}`}
+              onMouseDown={(e) => e.stopPropagation()}
+              className={`w-full bg-transparent font-bold font-mono text-xs uppercase focus:outline-none ${textColorClass} placeholder:${isDarkText ? 'text-black/50' : 'text-white/50'} z-30 relative`}
             />
           ) : (
-            <div className="w-full h-full flex items-center">
+            <div className="w-full h-full flex items-center pointer-events-none">
                <AnimatedTitle 
                   text={pin.title || pin.type.toUpperCase()} 
                   isDarkText={isDarkText} 
@@ -149,10 +147,12 @@ export default function PinCard({ pin }: { pin: Pin }) {
           )}
         </div>
         
+        {/* CROSS BUTTON (Fixed Right) */}
         <button 
-          onPointerDown={(e) => e.stopPropagation()} 
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()} 
           onClick={() => removePin(pin.id)}
-          className={`${mutedTextClass} font-bold px-1 rounded transition-colors`}
+          className={`${mutedTextClass} absolute right-2 w-6 h-6 flex items-center justify-center rounded-full transition-transform duration-200 hover:rotate-90 hover:bg-black/10 z-20`}
         >
           ✕
         </button>
@@ -170,6 +170,7 @@ export default function PinCard({ pin }: { pin: Pin }) {
           <textarea
             value={pin.content}
             onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             onFocus={() => saveHistory()}
             onChange={(e) => updateContent(pin.id, e.target.value)}
             placeholder="Type something..."
